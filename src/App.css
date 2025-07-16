@@ -1,0 +1,19 @@
+.nav-container{
+    padding: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-link{
+    padding: 0.5rem 1rem;
+    border: 2px solid #facc15;
+    border-radius: 4px;
+    background-color: #facc15;
+    color: black;
+    transition: background-color 0.2s ease;
+}
+
+.nav-link:hover{
+    background-color: #f5e08f;
+    border: 2px solid #f5e08f;
+}

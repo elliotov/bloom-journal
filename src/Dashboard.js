@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { db } from "./firebase";
+import { useAuth } from "./AuthContext";
+import { v4 as uuidv4 } from 'uuid';
+
+
 
 export default function Dashboard (){
     //const's for ToDo list
@@ -7,13 +12,14 @@ export default function Dashboard (){
     
     const handleAddToDo = () => {
         if(newToDo.trim() === '') return;
-        setToDos([...toDos, {text: newToDo, completed: false}]);
+        setToDos([...toDos, { id: uuidv4(), text: newToDo, completed: false}]);
         setNewToDo('');
     };
 
-    const toggleToDo = (index) => {
-        const updated = [...toDos];
-        updated[index].completed = !updated[index].completed;
+    const toggleToDo = (id) => {
+        const updated = toDos.map((toDo) =>
+            toDo.id === id ? {...toDo, completed: !toDo.completed} : toDo
+            );
         setToDos(updated);
     };
 
@@ -25,7 +31,7 @@ export default function Dashboard (){
 
     const handleAddHabit = () => {
         if (newHabit.trim() === '') return;
-        setHabits([...habits, {name: newHabit, log: {}}]);
+        setHabits([...habits, {id: uuidv4(), name: newHabit, log: {}}]);
         setNewHabit('');
     };
 
@@ -58,18 +64,18 @@ export default function Dashboard (){
             </form>
             <p>{toDos.filter(t => t.completed).length} / {toDos.length} tasks completed</p>
             <ul>
-                {[...toDos].sort((a,b) => a.completed - b.completed).map((toDo,i) => (
-                    <li key={i}>
+                {[...toDos].sort((a,b) => a.completed - b.completed).map((toDo) => (
+                    <li key={toDo.id}>
                         <label style={{textDecoration: toDo.completed ? 'line-through' : 'none'}}>
                             <input
                                 type="checkbox"
                                 checked={toDo.completed}
-                                onChange={() => toggleToDo(i)}
+                                onChange={() => toggleToDo(toDo.id)}
                             />
                             {toDo.text}
                         </label>
                         <button onClick={() => {
-                            const updated = toDos.filter((_, idx) => idx !== i);
+                            const updated = toDos.filter((toDo) => toDo.id !== toDo.id);
                             setToDos(updated);
                         }} style = {{marginLeft: '0.5rem'}}>❌</button>
                     </li>
@@ -97,19 +103,19 @@ export default function Dashboard (){
                     const bDone = b.log?.[today]?.completed || false;
                 return aDone - bDone;
                 })
-                .map((habit, i) => {
+                .map((habit) => {
                     const log = habit.log?.[today];
                     const isDone = log?.completed || false;
                     const loggedTime = log?.timestamp
                         ? new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
                         : '';
                 return (
-                    <li key={i}>
+                    <li key={habit.id}>
                         <label>
                             <input
                                 type="checkbox"
                                 checked={isDone}
-                                onChange={() => toggleHabit(i)}
+                                onChange={() => toggleHabit(habit.id)}
                             />
                             <span style={{textDecoration: isDone ? 'line-through' : 'none'}}>
                                 {habit.name}
@@ -121,7 +127,7 @@ export default function Dashboard (){
                             )}
                         </label>
                         <button onClick={() => {
-                            const updated = habits.filter((_, idx) => idx !== i);
+                            const updated = habits.filter((habit) => habit.id !== habit.id);
                             setHabits(updated);
                         }} style = {{marginLeft: '0.5rem'}}>❌</button>
                     </li>
